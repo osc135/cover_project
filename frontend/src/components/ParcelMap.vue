@@ -8,6 +8,10 @@ let map: google.maps.Map | null = null
 
 function initMap() {
   if (!mapRef.value || !store.parcelData) return
+  if (typeof google === 'undefined') {
+    console.warn('Google Maps not loaded yet')
+    return
+  }
 
   const parcel = store.parcelData.parcel
   const coords = getCenterFromGeometry(parcel.geometry)

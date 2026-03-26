@@ -3,8 +3,10 @@ import { useParcelStore } from '@/stores/parcel'
 
 const store = useParcelStore()
 
-// Zones we have rules for
-const indexedZones = ['R1', 'R2', 'RD']
+// Zones we have full rules for
+const fullyIndexedZones = ['R1', 'R2', 'RD']
+// Any residential zone gets partial coverage via general provisions (12.03, 12.21, 12.22)
+const residentialPrefixes = ['R1', 'R2', 'R3', 'R4', 'R5', 'RD', 'RE', 'RS', 'RW', 'RA', 'RU']
 
 function zoneStatus(zone: string | null | boolean, label: string) {
   if (zone === null || zone === false || zone === undefined) {
@@ -14,9 +16,14 @@ function zoneStatus(zone: string | null | boolean, label: string) {
     return { icon: '⚠', text: `${label}: Rules not fully indexed`, cls: 'partial' }
   }
   if (typeof zone === 'string') {
-    const prefix = zone.split('-')[0]
-    if (indexedZones.includes(prefix)) {
+    // Strip prefixes like (T)(Q) and get base zone before dash
+    const cleaned = zone.replace(/^\([A-Z]+\)/g, '')
+    const prefix = cleaned.split('-')[0]
+    if (fullyIndexedZones.includes(prefix)) {
       return { icon: '✓', text: `${label}: ${zone}`, cls: 'available' }
+    }
+    if (residentialPrefixes.some(r => prefix.startsWith(r))) {
+      return { icon: '⚠', text: `${label}: ${zone} — general rules available`, cls: 'partial' }
     }
     return { icon: '⚠', text: `${label}: ${zone} — rules not fully indexed`, cls: 'partial' }
   }

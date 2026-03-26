@@ -26,18 +26,20 @@ async def retrieve_chunks(
     query_text = f"{zone} {building_type} setbacks height FAR lot coverage ADU"
     embedding = await get_embedding(query_text)
 
+    embedding_str = "[" + ",".join(str(x) for x in embedding) + "]"
+
     sql = text("""
         SELECT section_id, zone, topic, text, source_url,
-               embedding <=> :embedding::vector AS distance
+               embedding <=> cast(:embedding as vector) AS distance
         FROM regulatory_chunks
         WHERE zone = :zone OR zone IS NULL
-        ORDER BY embedding <=> :embedding::vector
+        ORDER BY embedding <=> cast(:embedding as vector)
         LIMIT :top_k
     """)
 
     result = await db.execute(
         sql,
-        {"embedding": str(embedding), "zone": zone, "top_k": top_k},
+        {"embedding": embedding_str, "zone": zone, "top_k": top_k},
     )
     rows = result.fetchall()
 

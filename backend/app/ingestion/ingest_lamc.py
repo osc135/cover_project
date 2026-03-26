@@ -1,8 +1,10 @@
 """
-Offline script: Parse LAMC PDFs, chunk by subsection, embed, and store in PGVector.
+Offline script: Parse LAMC PDF, chunk by section/subsection, embed, and store in PGVector.
 
 Usage:
-    python -m app.ingestion.ingest_lamc --pdf-dir ./data/lamc_pdfs
+    cd backend
+    source .venv/bin/activate
+    python -m app.ingestion.ingest_lamc --pdf ./data/lamc_pdfs/lamc_all.pdf
 """
 
 from __future__ import annotations
@@ -23,11 +25,12 @@ SECTION_ZONE_MAP = {
     "12.09": "R2",   # R2 Two-Family Zone
     "12.09.1": "RD", # RD Restricted Density
     "12.21": None,   # Height districts — applies to all zones
-    "12.22": None,   # Accessory uses / ADU — applies to all zones
+    "12.21.1": None, # Height of buildings
+    "12.22": None,   # Exceptions / accessory uses / ADU
 }
 
-# Regex to split on subsection headers like "12.08 A.", "12.08 C.1.", etc.
-SUBSECTION_RE = re.compile(r"((?:SEC\.\s*)?12\.\d{2}(?:\.\d)?\s+[A-Z]\.(?:\d+\.)?)")
+# Regex to detect section headers
+SECTION_HEADER_RE = re.compile(r"SEC\.\s*(12\.\d{2}(?:\.\d+)?)\.")
 
 
 def extract_text_from_pdf(pdf_path: Path) -> str:
@@ -40,44 +43,51 @@ def extract_text_from_pdf(pdf_path: Path) -> str:
     return text
 
 
-def chunk_by_subsection(text: str, section_id: str, overlap_chars: int = 200) -> list[dict]:
-    """Split text by subsection headers with overlap."""
-    parts = SUBSECTION_RE.split(text)
+def split_by_section(full_text: str) -> dict[str, str]:
+    """Split the full text into sections based on SEC. headers."""
+    sections = {}
+    positions = []
+
+    for match in SECTION_HEADER_RE.finditer(full_text):
+        sec_id = match.group(1)
+        if sec_id in SECTION_ZONE_MAP:
+            positions.append((match.start(), sec_id))
+
+    for i, (start, sec_id) in enumerate(positions):
+        end = positions[i + 1][0] if i + 1 < len(positions) else len(full_text)
+        sections[sec_id] = full_text[start:end].strip()
+
+    return sections
+
+
+def chunk_text(text: str, section_id: str, max_chars: int = 1500, overlap: int = 200) -> list[dict]:
+    """Split section text into overlapping chunks by newline boundaries."""
     chunks = []
+    lines = text.split("\n")
+    current_chunk = ""
+    current_topic = section_id
 
-    # Parts alternate: [preamble, header1, body1, header2, body2, ...]
-    # Handle preamble
-    if parts[0].strip():
+    for line in lines:
+        # Check if this line has a subsection header
+        sub_match = re.match(r"(?:SEC\.\s*)?(\d+\.\d+(?:\.\d+)?\s+[A-Z]\.(?:\d+\.)?)", line)
+        if sub_match:
+            current_topic = sub_match.group(1).strip().rstrip(".")
+
+        if len(current_chunk) + len(line) > max_chars and current_chunk:
+            chunks.append({
+                "section_id": section_id,
+                "topic": current_topic,
+                "text": current_chunk.strip(),
+            })
+            current_chunk = current_chunk[-overlap:] + "\n" + line
+        else:
+            current_chunk += "\n" + line if current_chunk else line
+
+    if current_chunk.strip():
         chunks.append({
             "section_id": section_id,
-            "topic": f"{section_id} (preamble)",
-            "text": parts[0].strip(),
-        })
-
-    for i in range(1, len(parts) - 1, 2):
-        header = parts[i].strip()
-        body = parts[i + 1].strip() if i + 1 < len(parts) else ""
-        chunk_text = f"{header} {body}"
-
-        # Add overlap from previous chunk
-        if chunks and overlap_chars > 0:
-            prev_text = chunks[-1]["text"]
-            overlap = prev_text[-overlap_chars:] if len(prev_text) > overlap_chars else prev_text
-            chunk_text = f"...{overlap}\n\n{chunk_text}"
-
-        topic_label = header.rstrip(".")
-        chunks.append({
-            "section_id": section_id,
-            "topic": topic_label,
-            "text": chunk_text,
-        })
-
-    # If no subsection headers found, treat whole text as one chunk
-    if not chunks:
-        chunks.append({
-            "section_id": section_id,
-            "topic": section_id,
-            "text": text.strip(),
+            "topic": current_topic,
+            "text": current_chunk.strip(),
         })
 
     return chunks
@@ -87,12 +97,12 @@ def embed_chunks(chunks: list[dict], api_key: str) -> list[dict]:
     client = OpenAI(api_key=api_key)
     texts = [c["text"] for c in chunks]
 
-    # Batch embed (max 2048 per call)
     all_embeddings = []
     for i in range(0, len(texts), 100):
         batch = texts[i : i + 100]
         resp = client.embeddings.create(model="text-embedding-3-small", input=batch)
         all_embeddings.extend([d.embedding for d in resp.data])
+        print(f"  Embedded batch {i // 100 + 1} ({len(batch)} chunks)")
 
     for chunk, emb in zip(chunks, all_embeddings):
         chunk["embedding"] = emb
@@ -101,7 +111,7 @@ def embed_chunks(chunks: list[dict], api_key: str) -> list[dict]:
 
 
 def store_chunks(chunks: list[dict], zone: str | None, db_url: str, source_url: str = ""):
-    conn = psycopg2.connect(db_url.replace("+asyncpg", "").replace("postgresql+asyncpg", "postgresql"))
+    conn = psycopg2.connect(db_url)
     cur = conn.cursor()
 
     for chunk in chunks:
@@ -126,42 +136,47 @@ def store_chunks(chunks: list[dict], zone: str | None, db_url: str, source_url: 
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Ingest LAMC PDFs into PGVector")
-    parser.add_argument("--pdf-dir", type=str, required=True, help="Directory containing LAMC PDF files")
+    parser = argparse.ArgumentParser(description="Ingest LAMC PDF into PGVector")
+    parser.add_argument("--pdf", type=str, required=True, help="Path to the LAMC PDF")
     parser.add_argument("--db-url", type=str, default="postgresql://cover:cover@localhost:5432/cover")
-    parser.add_argument("--openai-key", type=str, required=True)
+    parser.add_argument("--openai-key", type=str, default=None)
     args = parser.parse_args()
 
-    pdf_dir = Path(args.pdf_dir)
+    # Try to load key from .env if not provided
+    if not args.openai_key:
+        from dotenv import dotenv_values
+        env = dotenv_values(Path(__file__).resolve().parent.parent.parent.parent / ".env")
+        args.openai_key = env.get("OPENAI_API_KEY", "")
 
-    for pdf_file in sorted(pdf_dir.glob("*.pdf")):
-        # Try to match filename to a known section (e.g., "12.08.pdf" or "section_12.08.pdf")
-        name = pdf_file.stem.replace("section_", "").replace("Section_", "")
-        section_id = None
-        for sid in SECTION_ZONE_MAP:
-            if sid in name:
-                section_id = sid
-                break
+    if not args.openai_key:
+        print("ERROR: No OpenAI key. Pass --openai-key or set OPENAI_API_KEY in .env")
+        return
 
-        if not section_id:
-            print(f"Skipping {pdf_file.name} — no matching LAMC section")
-            continue
+    pdf_path = Path(args.pdf)
+    print(f"Reading {pdf_path.name}...")
+    full_text = extract_text_from_pdf(pdf_path)
+    print(f"  {len(full_text)} characters extracted")
 
-        zone = SECTION_ZONE_MAP[section_id]
-        print(f"Processing {pdf_file.name} → section {section_id} (zone: {zone or 'all'})")
+    print("Splitting into sections...")
+    sections = split_by_section(full_text)
+    print(f"  Found sections: {list(sections.keys())}")
 
-        text = extract_text_from_pdf(pdf_file)
-        chunks = chunk_by_subsection(text, section_id)
-        print(f"  {len(chunks)} chunks extracted")
+    total_chunks = 0
+    for sec_id, sec_text in sections.items():
+        zone = SECTION_ZONE_MAP.get(sec_id)
+        print(f"\nProcessing {sec_id} (zone: {zone or 'all'})...")
+
+        chunks = chunk_text(sec_text, sec_id)
+        print(f"  {len(chunks)} chunks")
 
         chunks = embed_chunks(chunks, args.openai_key)
-        print(f"  Embeddings generated")
 
-        source_url = f"https://codelibrary.amlegal.com/codes/los_angeles/latest/lamc/0-0-0-{section_id.replace('.', '-')}"
+        source_url = f"https://codelibrary.amlegal.com/codes/los_angeles/latest/lapz"
         store_chunks(chunks, zone, args.db_url, source_url)
         print(f"  Stored in DB")
+        total_chunks += len(chunks)
 
-    print("Done.")
+    print(f"\nDone. {total_chunks} total chunks ingested.")
 
 
 if __name__ == "__main__":

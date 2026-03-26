@@ -71,8 +71,11 @@ export const useParcelStore = defineStore('parcel', () => {
     error.value = null
 
     try {
-      assessment.value = await runAssessment(parcelData.value.parcel.apn, bt)
+      const result = await runAssessment(parcelData.value.parcel.apn, bt)
+      console.log('Assessment result:', result)
+      assessment.value = result
     } catch (e: any) {
+      console.error('Assessment error:', e)
       error.value = e.response?.data?.detail || 'Assessment failed'
     } finally {
       loading.value = false
