@@ -1,5 +1,9 @@
+from pathlib import Path
 from pydantic_settings import BaseSettings
 from functools import lru_cache
+
+# .env lives in the project root (one level above backend/)
+ENV_FILE = Path(__file__).resolve().parent.parent.parent / ".env"
 
 
 class Settings(BaseSettings):
@@ -10,7 +14,8 @@ class Settings(BaseSettings):
     openai_chat_model: str = "gpt-4o"
 
     class Config:
-        env_file = ".env"
+        env_file = str(ENV_FILE)
+        extra = "ignore"
 
 
 @lru_cache

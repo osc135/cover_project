@@ -43,7 +43,7 @@ async def _stream_pipeline(req: ConfirmAddressRequest, db: AsyncSession):
     base_zone = None
     if zoning_feature:
         zprops = zoning_feature.get("properties", {})
-        base_zone = zprops.get("ZONE_CMPLT") or zprops.get("ZONE_CLASS")
+        base_zone = zprops.get("Zoning") or zprops.get("ZONE_CMPLT") or zprops.get("ZONE_CLASS")
     yield event("zoning", "complete")
 
     # 3 - Fetch overlays
@@ -59,30 +59,24 @@ async def _stream_pipeline(req: ConfirmAddressRequest, db: AsyncSession):
     # 5 - Store in DB
     yield event("storing", "in_progress", "Saving parcel data...")
     try:
+        geom_json = json.dumps(parcel_feature.get("geometry"))
         await db.execute(
             text("""
-                INSERT INTO parcels (apn, address, lot_size_sqft, geometry, raw_response)
-                VALUES (:apn, :address, :lot_size, ST_GeomFromGeoJSON(:geom), :raw)
+                INSERT INTO parcels (apn, address, lot_size_sqft, geometry)
+                VALUES (:apn, :address, :lot_size, cast(:geom as jsonb))
                 ON CONFLICT (apn) DO UPDATE SET
                     address = EXCLUDED.address,
                     lot_size_sqft = EXCLUDED.lot_size_sqft,
-                    geometry = EXCLUDED.geometry,
-                    raw_response = EXCLUDED.raw_response
+                    geometry = EXCLUDED.geometry
             """),
-            {
-                "apn": apn,
-                "address": req.formatted_address,
-                "lot_size": lot_size,
-                "geom": json.dumps(parcel_feature.get("geometry")),
-                "raw": json.dumps(parcel_feature),
-            },
+            {"apn": apn, "address": req.formatted_address, "lot_size": lot_size, "geom": geom_json},
         )
 
         # Store zoning
         await db.execute(
             text("""
-                INSERT INTO zoning_designations (apn, base_zone, hillside, coastal_zone, fire_hazard, hpoz, specific_plan, flood_zone, raw_response)
-                VALUES (:apn, :base_zone, :hillside, :coastal, :fire, :hpoz, :sp, :flood, :raw)
+                INSERT INTO zoning_designations (apn, base_zone, hillside, coastal_zone, fire_hazard, hpoz, specific_plan, flood_zone)
+                VALUES (:apn, :base_zone, :hillside, :coastal, :fire, :hpoz, :sp, :flood)
                 ON CONFLICT (apn) DO UPDATE SET
                     base_zone = EXCLUDED.base_zone,
                     hillside = EXCLUDED.hillside,
@@ -90,8 +84,7 @@ async def _stream_pipeline(req: ConfirmAddressRequest, db: AsyncSession):
                     fire_hazard = EXCLUDED.fire_hazard,
                     hpoz = EXCLUDED.hpoz,
                     specific_plan = EXCLUDED.specific_plan,
-                    flood_zone = EXCLUDED.flood_zone,
-                    raw_response = EXCLUDED.raw_response
+                    flood_zone = EXCLUDED.flood_zone
             """),
             {
                 "apn": apn,
@@ -102,24 +95,23 @@ async def _stream_pipeline(req: ConfirmAddressRequest, db: AsyncSession):
                 "hpoz": overlays.get("hpoz") is not None,
                 "sp": (overlays.get("specific_plan") or {}).get("attributes", {}).get("SPECIFIC_PLAN") if overlays.get("specific_plan") else None,
                 "flood": (overlays.get("flood_zone") or {}).get("attributes", {}).get("FLD_ZONE") if overlays.get("flood_zone") else None,
-                "raw": json.dumps(overlays, default=str),
             },
         )
 
         # Store buildings
         for bf in building_features:
             bprops = bf.get("properties", {})
+            bf_geom = json.dumps(bf.get("geometry"))
             await db.execute(
                 text("""
-                    INSERT INTO buildings (apn, building_type, sqft, geometry, raw_response)
-                    VALUES (:apn, :btype, :sqft, ST_GeomFromGeoJSON(:geom), :raw)
+                    INSERT INTO buildings (apn, building_type, sqft, geometry)
+                    VALUES (:apn, :btype, :sqft, cast(:geom as jsonb))
                 """),
                 {
                     "apn": apn,
                     "btype": bprops.get("UseType"),
                     "sqft": bprops.get("Shape__Area"),
-                    "geom": json.dumps(bf.get("geometry")),
-                    "raw": json.dumps(bf),
+                    "geom": bf_geom,
                 },
             )
 
@@ -172,7 +164,7 @@ async def confirm_address(req: ConfirmAddressRequest, db: AsyncSession = Depends
 @router.get("/parcel/{apn}", response_model=ParcelResponse)
 async def get_parcel(apn: str, db: AsyncSession = Depends(get_db)):
     row = await db.execute(
-        text("SELECT apn, address, lot_size_sqft, ST_AsGeoJSON(geometry)::json as geometry FROM parcels WHERE apn = :apn"),
+        text("SELECT apn, address, lot_size_sqft, geometry FROM parcels WHERE apn = :apn"),
         {"apn": apn},
     )
     parcel = row.fetchone()
@@ -180,7 +172,7 @@ async def get_parcel(apn: str, db: AsyncSession = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Parcel not found")
 
     buildings_row = await db.execute(
-        text("SELECT building_type, sqft, ST_AsGeoJSON(geometry)::json as geometry FROM buildings WHERE apn = :apn"),
+        text("SELECT building_type, sqft, geometry FROM buildings WHERE apn = :apn"),
         {"apn": apn},
     )
     buildings = buildings_row.fetchall()

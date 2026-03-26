@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 from openai import AsyncOpenAI

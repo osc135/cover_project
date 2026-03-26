@@ -5,6 +5,8 @@ Usage:
     python -m app.ingestion.ingest_lamc --pdf-dir ./data/lamc_pdfs
 """
 
+from __future__ import annotations
+
 import argparse
 import re
 from pathlib import Path

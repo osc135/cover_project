@@ -1,5 +1,4 @@
 -- Extensions
-CREATE EXTENSION IF NOT EXISTS postgis;
 CREATE EXTENSION IF NOT EXISTS vector;
 
 -- Parcels
@@ -9,12 +8,11 @@ CREATE TABLE IF NOT EXISTS parcels (
     address TEXT NOT NULL,
     city VARCHAR(100),
     lot_size_sqft DOUBLE PRECISION,
-    geometry GEOMETRY(POLYGON, 4326),
+    geometry JSONB,
     raw_response JSONB,
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
 CREATE INDEX IF NOT EXISTS idx_parcels_apn ON parcels(apn);
-CREATE INDEX IF NOT EXISTS idx_parcels_geometry ON parcels USING GIST(geometry);
 
 -- Buildings
 CREATE TABLE IF NOT EXISTS buildings (
@@ -22,7 +20,7 @@ CREATE TABLE IF NOT EXISTS buildings (
     apn VARCHAR(20) NOT NULL REFERENCES parcels(apn),
     building_type VARCHAR(50),
     sqft DOUBLE PRECISION,
-    geometry GEOMETRY(POLYGON, 4326),
+    geometry JSONB,
     raw_response JSONB,
     created_at TIMESTAMPTZ DEFAULT NOW()
 );

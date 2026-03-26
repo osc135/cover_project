@@ -1,3 +1,5 @@
+from __future__ import annotations
+from typing import Optional, List
 from pydantic import BaseModel
 
 
@@ -11,11 +13,11 @@ class AddressCandidate(BaseModel):
     formatted_address: str
     lat: float
     lng: float
-    place_id: str | None = None
+    place_id: Optional[str] = None
 
 
 class AddressResponse(BaseModel):
-    candidates: list[AddressCandidate]
+    candidates: List[AddressCandidate]
     needs_confirmation: bool
 
 
@@ -30,30 +32,30 @@ class ConfirmAddressRequest(BaseModel):
 class ParcelSummary(BaseModel):
     apn: str
     address: str
-    lot_size_sqft: float | None = None
-    geometry: dict | None = None  # GeoJSON
+    lot_size_sqft: Optional[float] = None
+    geometry: Optional[dict] = None  # GeoJSON
 
 
 class BuildingFootprint(BaseModel):
-    building_type: str | None = None
-    sqft: float | None = None
-    geometry: dict | None = None
+    building_type: Optional[str] = None
+    sqft: Optional[float] = None
+    geometry: Optional[dict] = None
 
 
 class ZoningInfo(BaseModel):
-    base_zone: str | None = None
-    height_district: str | None = None
+    base_zone: Optional[str] = None
+    height_district: Optional[str] = None
     hillside: bool = False
     coastal_zone: bool = False
-    fire_hazard: str | None = None
+    fire_hazard: Optional[str] = None
     hpoz: bool = False
-    specific_plan: str | None = None
-    flood_zone: str | None = None
+    specific_plan: Optional[str] = None
+    flood_zone: Optional[str] = None
 
 
 class ParcelResponse(BaseModel):
     parcel: ParcelSummary
-    buildings: list[BuildingFootprint]
+    buildings: List[BuildingFootprint]
     zoning: ZoningInfo
 
 
@@ -76,12 +78,12 @@ class Constraint(BaseModel):
 class AssessmentResponse(BaseModel):
     apn: str
     building_type: str
-    buildable: bool | None = None
+    buildable: Optional[bool] = None
     confidence_score: float
     confidence_grade: str
     summary: str
-    constraints: list[Constraint]
-    open_questions: list[str]
+    constraints: List[Constraint]
+    open_questions: List[str]
 
 
 # --- Chat ---
@@ -100,4 +102,4 @@ class ChatResponse(BaseModel):
 class PipelineStep(BaseModel):
     step: str
     status: str  # pending, in_progress, complete, error
-    detail: str | None = None
+    detail: Optional[str] = None
