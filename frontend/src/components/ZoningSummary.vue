@@ -4,7 +4,7 @@ import { useParcelStore } from '@/stores/parcel'
 const store = useParcelStore()
 
 // Zones we have full rules for
-const fullyIndexedZones = ['R1', 'R2', 'RD']
+const fullyIndexedZones = ['R1', 'R2', 'R3', 'R4', 'R5', 'RD', 'RE', 'RS', 'RU', 'RW']
 // Any residential zone gets partial coverage via general provisions (12.03, 12.21, 12.22)
 const residentialPrefixes = ['R1', 'R2', 'R3', 'R4', 'R5', 'RD', 'RE', 'RS', 'RW', 'RA', 'RU']
 
@@ -17,7 +17,7 @@ function zoneStatus(zone: string | null | boolean, label: string) {
   }
   if (typeof zone === 'string') {
     // Strip prefixes like (T)(Q) and get base zone before dash
-    const cleaned = zone.replace(/^\([A-Z]+\)/g, '')
+    const cleaned = zone.replace(/^(\([A-Z]+\)|\[[A-Z]+\])+/g, '')
     const prefix = cleaned.split('-')[0]
     if (fullyIndexedZones.includes(prefix)) {
       return { icon: '✓', text: `${label}: ${zone}`, cls: 'available' }

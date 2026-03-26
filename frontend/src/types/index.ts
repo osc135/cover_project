@@ -44,12 +44,21 @@ export interface Constraint {
   type: 'deterministic' | 'interpretive'
 }
 
+export interface ConfidenceBreakdown {
+  data_quality: number
+  rule_confidence: number
+  overall: number
+  grade: string
+  factors: string[]
+}
+
 export interface Assessment {
   apn: string
   building_type: string
   buildable: boolean | null
   confidence_score: number
   confidence_grade: string
+  confidence_breakdown?: ConfidenceBreakdown
   summary: string
   constraints: Constraint[]
   open_questions: string[]

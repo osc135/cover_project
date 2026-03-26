@@ -4,9 +4,93 @@ from sqlalchemy import text
 import json
 
 from app.db import get_db
-from app.models.schemas import AssessRequest, AssessmentResponse
+from app.models.schemas import AssessRequest, AssessmentResponse, ConfidenceBreakdown
 from app.services.rag import retrieve_chunks
 from app.services.llm import run_assessment
+
+# Indexed zone prefixes
+INDEXED_ZONES = {"R1", "R2", "R3", "R4", "R5", "RD", "RE", "RS", "RU", "RW"}
+
+
+def compute_confidence(parcel_data: dict, zoning_data: dict, buildings: list, chunks: list, constraints: list) -> ConfidenceBreakdown:
+    """Calculate confidence from data quality and rule confidence separately."""
+    factors = []
+
+    # --- Data Quality (0.0 - 1.0) ---
+    dq_score = 1.0
+
+    # Lot size: big factor
+    if not parcel_data.get("lot_size_sqft"):
+        dq_score -= 0.25
+        factors.append("Lot size missing (-25% data quality)")
+
+    # Base zone indexed?
+    import re
+    base_zone = zoning_data.get("base_zone") or ""
+    zone_clean = re.sub(r'^(\([A-Z]+\)|\[[A-Z]+\])+', '', base_zone)
+    zone_prefix = zone_clean.split("-")[0]
+    if zone_prefix not in INDEXED_ZONES:
+        dq_score -= 0.30
+        factors.append(f"Zone {base_zone} rules not fully indexed (-30% data quality)")
+
+    # Buildings found?
+    if not buildings:
+        dq_score -= 0.10
+        factors.append("No existing building data found (-10% data quality)")
+
+    # Unindexed overlays
+    overlay_hits = []
+    if zoning_data.get("hillside"):
+        overlay_hits.append("Hillside")
+    if zoning_data.get("coastal_zone"):
+        overlay_hits.append("Coastal Zone")
+    if zoning_data.get("specific_plan"):
+        overlay_hits.append(f"Specific Plan: {zoning_data['specific_plan']}")
+    if zoning_data.get("hpoz"):
+        overlay_hits.append("HPOZ")
+    if overlay_hits:
+        dq_score -= 0.05 * len(overlay_hits)
+        factors.append(f"Overlay zones detected but not fully modeled: {', '.join(overlay_hits)} (-{5 * len(overlay_hits)}% data quality)")
+
+    # RAG chunks found?
+    if len(chunks) < 3:
+        dq_score -= 0.15
+        factors.append(f"Only {len(chunks)} regulatory chunks found (-15% data quality)")
+
+    dq_score = max(0.0, min(1.0, dq_score))
+
+    # --- Rule Confidence (from LLM constraint levels) ---
+    if constraints:
+        weights = {"HIGH": 1.0, "MEDIUM": 0.6, "LOW": 0.2}
+        total = sum(weights.get(c.get("confidence", c.confidence if hasattr(c, "confidence") else "LOW"), 0.2) for c in constraints)
+        rc_score = total / len(constraints)
+        high_count = sum(1 for c in constraints if (c.get("confidence") if isinstance(c, dict) else c.confidence) == "HIGH")
+        med_count = sum(1 for c in constraints if (c.get("confidence") if isinstance(c, dict) else c.confidence) == "MEDIUM")
+        low_count = sum(1 for c in constraints if (c.get("confidence") if isinstance(c, dict) else c.confidence) == "LOW")
+        factors.append(f"Rule confidence: {high_count} HIGH, {med_count} MEDIUM, {low_count} LOW")
+    else:
+        rc_score = 0.3
+        factors.append("No constraints generated — low rule confidence")
+
+    # --- Overall ---
+    overall = round(dq_score * rc_score, 2)
+
+    if overall >= 0.90:
+        grade = "A"
+    elif overall >= 0.75:
+        grade = "B"
+    elif overall >= 0.60:
+        grade = "C"
+    else:
+        grade = "D"
+
+    return ConfidenceBreakdown(
+        data_quality=round(dq_score, 2),
+        rule_confidence=round(rc_score, 2),
+        overall=overall,
+        grade=grade,
+        factors=factors,
+    )
 
 router = APIRouter()
 
@@ -58,8 +142,10 @@ async def assess(req: AssessRequest, db: AsyncSession = Depends(get_db)):
 
     # RAG retrieval
     base_zone = zoning.base_zone or "R1"
-    # Strip height district suffix for chunk lookup (e.g., "R1-1" -> "R1")
-    zone_prefix = base_zone.split("-")[0] if base_zone else "R1"
+    # Strip prefixes like [Q], (T)(Q) and height district suffix (e.g., "[Q]R3-1" -> "R3")
+    import re
+    zone_clean = re.sub(r'^(\([A-Z]+\)|\[[A-Z]+\])+', '', base_zone)
+    zone_prefix = zone_clean.split("-")[0] if zone_clean else "R1"
     chunks = await retrieve_chunks(db, zone_prefix, req.building_type)
 
     # Build context dicts
@@ -81,6 +167,13 @@ async def assess(req: AssessRequest, db: AsyncSession = Depends(get_db)):
 
     # Run LLM assessment
     result = await run_assessment(parcel_data, zoning_data, buildings, chunks, req.building_type)
+
+    # Compute our own confidence score
+    constraint_dicts = [c.model_dump() for c in result.constraints]
+    breakdown = compute_confidence(parcel_data, zoning_data, buildings, chunks, constraint_dicts)
+    result.confidence_score = breakdown.overall
+    result.confidence_grade = breakdown.grade
+    result.confidence_breakdown = breakdown
 
     # Cache result
     await db.execute(

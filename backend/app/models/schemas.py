@@ -75,12 +75,21 @@ class Constraint(BaseModel):
     type: str  # deterministic, interpretive
 
 
+class ConfidenceBreakdown(BaseModel):
+    data_quality: float  # 0.0 - 1.0
+    rule_confidence: float  # 0.0 - 1.0
+    overall: float  # data_quality * rule_confidence
+    grade: str  # A/B/C/D
+    factors: List[str]  # human-readable explanations
+
+
 class AssessmentResponse(BaseModel):
     apn: str
     building_type: str
     buildable: Optional[bool] = None
     confidence_score: float
     confidence_grade: str
+    confidence_breakdown: Optional[ConfidenceBreakdown] = None
     summary: str
     constraints: List[Constraint]
     open_questions: List[str]

@@ -4,15 +4,30 @@ import { useParcelStore } from '@/stores/parcel'
 
 const store = useParcelStore()
 const mapRef = ref<HTMLDivElement>()
+const mapReady = ref(false)
 let map: google.maps.Map | null = null
 
-function initMap() {
-  if (!mapRef.value || !store.parcelData) return
-  if (typeof google === 'undefined') {
-    console.warn('Google Maps not loaded yet')
-    return
-  }
+function waitForGoogle(): Promise<void> {
+  if (typeof google !== 'undefined') return Promise.resolve()
+  return new Promise((resolve) => {
+    const check = setInterval(() => {
+      if (typeof google !== 'undefined') {
+        clearInterval(check)
+        resolve()
+      }
+    }, 100)
+    // Give up after 10 seconds
+    setTimeout(() => { clearInterval(check); resolve() }, 10000)
+  })
+}
 
+async function initMap() {
+  if (!mapRef.value || !store.parcelData) return
+
+  await waitForGoogle()
+  if (typeof google === 'undefined') return
+
+  mapReady.value = true
   const parcel = store.parcelData.parcel
   const coords = getCenterFromGeometry(parcel.geometry)
 

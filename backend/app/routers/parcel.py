@@ -1,8 +1,11 @@
+import logging
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import StreamingResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import text
 import json
+
+logger = logging.getLogger(__name__)
 
 from app.db import get_db
 from app.models.schemas import (
@@ -34,7 +37,8 @@ async def _stream_pipeline(req: ConfirmAddressRequest, db: AsyncSession):
         return
     props = parcel_feature.get("properties", {})
     apn = props.get("APN", props.get("AIN", ""))
-    lot_size = props.get("ShapeArea") or props.get("Shape__Area")
+    lot_size = props.get("Shape.STArea()") or props.get("ShapeArea") or props.get("Shape__Area")
+    logger.info(f"Parcel {apn}: lot_size={lot_size}, use={props.get('UseType')}, beds={props.get('Bedrooms1')}, sqft={props.get('SQFTmain1')}")
     yield event("parcel", "complete")
 
     # 2 - Fetch zoning

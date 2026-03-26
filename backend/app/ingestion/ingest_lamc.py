@@ -19,14 +19,21 @@ import psycopg2
 
 # LAMC sections we care about and their zone mappings
 SECTION_ZONE_MAP = {
-    "12.03": None,   # Definitions — applies to all zones
-    "12.04": None,   # Zone hierarchy — applies to all zones
-    "12.08": "R1",   # R1 One-Family Zone
-    "12.09": "R2",   # R2 Two-Family Zone
-    "12.09.1": "RD", # RD Restricted Density
-    "12.21": None,   # Height districts — applies to all zones
-    "12.21.1": None, # Height of buildings
-    "12.22": None,   # Exceptions / accessory uses / ADU
+    "12.03": None,    # Definitions — applies to all zones
+    "12.04": None,    # Zone hierarchy — applies to all zones
+    "12.07": "RE",    # RE Residential Estate
+    "12.07.01": "RS", # RS Suburban
+    "12.08": "R1",    # R1 One-Family Zone
+    "12.08.5": "RU",  # RU Residential Urban
+    "12.09": "R2",    # R2 Two-Family Zone
+    "12.09.1": "RD",  # RD Restricted Density
+    "12.09.5": "RW",  # RW Residential Waterways
+    "12.10": "R3",    # R3 Multiple Dwelling
+    "12.10.5": "R4",  # R4 Multiple Dwelling
+    "12.11": "R5",    # R5 Multiple Dwelling
+    "12.21": None,    # General Provisions — applies to all zones
+    "12.21.1": None,  # Height of buildings
+    "12.22": None,    # Exceptions / accessory uses / ADU
 }
 
 # Regex to detect section headers
