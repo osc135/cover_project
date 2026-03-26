@@ -56,7 +56,7 @@ async def fetch_buildings(lat: float, lng: float) -> List[dict]:
         "returnGeometry": "true",
         "f": "geojson",
     }
-    async with httpx.AsyncClient(timeout=15) as client:
+    async with httpx.AsyncClient(timeout=30) as client:
         resp = await client.get(BUILDINGS_URL, params=params)
         resp.raise_for_status()
         data = resp.json()

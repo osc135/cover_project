@@ -5,11 +5,23 @@ export interface AddressCandidate {
   place_id?: string
 }
 
+export interface ExistingProperty {
+  use_type: string | null
+  use_description: string | null
+  year_built: number | null
+  sqft: number | null
+  bedrooms: number | null
+  bathrooms: number | null
+  land_value: number | null
+  improvement_value: number | null
+}
+
 export interface ParcelSummary {
   apn: string
   address: string
   lot_size_sqft: number | null
   geometry: GeoJSON.Geometry | null
+  existing_property?: ExistingProperty
 }
 
 export interface BuildingFootprint {

@@ -14,6 +14,7 @@ from app.models.schemas import (
     ParcelSummary,
     BuildingFootprint,
     ZoningInfo,
+    ExistingProperty,
 )
 from app.services import gis
 
@@ -57,7 +58,11 @@ async def _stream_pipeline(req: ConfirmAddressRequest, db: AsyncSession):
 
     # 4 - Fetch buildings
     yield event("buildings", "in_progress", "Fetching existing building footprints...")
-    building_features = await gis.fetch_buildings(lat, lng)
+    try:
+        building_features = await gis.fetch_buildings(lat, lng)
+    except Exception as e:
+        logger.warning(f"Buildings fetch failed: {e}")
+        building_features = []
     yield event("buildings", "complete")
 
     # 5 - Store in DB
@@ -95,9 +100,9 @@ async def _stream_pipeline(req: ConfirmAddressRequest, db: AsyncSession):
                 "base_zone": base_zone,
                 "hillside": overlays.get("hillside") is not None,
                 "coastal": overlays.get("coastal_zone") is not None,
-                "fire": (overlays.get("fire_hazard") or {}).get("attributes", {}).get("HAZ_CODE") if overlays.get("fire_hazard") else None,
+                "fire": "Yes" if overlays.get("fire_hazard") else None,
                 "hpoz": overlays.get("hpoz") is not None,
-                "sp": (overlays.get("specific_plan") or {}).get("attributes", {}).get("SPECIFIC_PLAN") if overlays.get("specific_plan") else None,
+                "sp": (overlays.get("specific_plan") or {}).get("attributes", {}).get("SPA_NM") if overlays.get("specific_plan") else None,
                 "flood": (overlays.get("flood_zone") or {}).get("attributes", {}).get("FLD_ZONE") if overlays.get("flood_zone") else None,
             },
         )
@@ -127,6 +132,18 @@ async def _stream_pipeline(req: ConfirmAddressRequest, db: AsyncSession):
 
     yield event("storing", "complete")
 
+    # Build existing property info from parcel attributes
+    existing = ExistingProperty(
+        use_type=props.get("UseType"),
+        use_description=props.get("UseDescription"),
+        year_built=int(props["YearBuilt1"]) if props.get("YearBuilt1") else None,
+        sqft=float(props["SQFTmain1"]) if props.get("SQFTmain1") else None,
+        bedrooms=int(props["Bedrooms1"]) if props.get("Bedrooms1") else None,
+        bathrooms=int(props["Bathrooms1"]) if props.get("Bathrooms1") else None,
+        land_value=float(props["Roll_LandValue"]) if props.get("Roll_LandValue") else None,
+        improvement_value=float(props["Roll_ImpValue"]) if props.get("Roll_ImpValue") else None,
+    )
+
     # Final response with full parcel data
     result = ParcelResponse(
         parcel=ParcelSummary(
@@ -134,6 +151,7 @@ async def _stream_pipeline(req: ConfirmAddressRequest, db: AsyncSession):
             address=req.formatted_address,
             lot_size_sqft=lot_size,
             geometry=parcel_feature.get("geometry"),
+            existing_property=existing,
         ),
         buildings=[
             BuildingFootprint(
@@ -147,9 +165,9 @@ async def _stream_pipeline(req: ConfirmAddressRequest, db: AsyncSession):
             base_zone=base_zone,
             hillside=overlays.get("hillside") is not None,
             coastal_zone=overlays.get("coastal_zone") is not None,
-            fire_hazard=(overlays.get("fire_hazard") or {}).get("attributes", {}).get("HAZ_CODE") if overlays.get("fire_hazard") else None,
+            fire_hazard="Yes" if overlays.get("fire_hazard") else None,
             hpoz=overlays.get("hpoz") is not None,
-            specific_plan=(overlays.get("specific_plan") or {}).get("attributes", {}).get("SPECIFIC_PLAN") if overlays.get("specific_plan") else None,
+            specific_plan=(overlays.get("specific_plan") or {}).get("attributes", {}).get("SPA_NM") if overlays.get("specific_plan") else None,
             flood_zone=(overlays.get("flood_zone") or {}).get("attributes", {}).get("FLD_ZONE") if overlays.get("flood_zone") else None,
         ),
     )

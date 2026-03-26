@@ -8,6 +8,7 @@ import ZoningSummary from '@/components/ZoningSummary.vue'
 import AssessmentPanel from '@/components/AssessmentPanel.vue'
 import BuildingTypeSelector from '@/components/BuildingTypeSelector.vue'
 import ChatPanel from '@/components/ChatPanel.vue'
+import ExistingProperty from '@/components/ExistingProperty.vue'
 
 const store = useParcelStore()
 
@@ -76,6 +77,7 @@ function tryDemo(address: string) {
         <ZoningSummary />
         <BuildingTypeSelector />
       </div>
+      <ExistingProperty />
       <AssessmentPanel />
       <ChatPanel />
     </div>

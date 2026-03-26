@@ -29,11 +29,23 @@ class ConfirmAddressRequest(BaseModel):
 
 # --- Parcel ---
 
+class ExistingProperty(BaseModel):
+    use_type: Optional[str] = None
+    use_description: Optional[str] = None
+    year_built: Optional[int] = None
+    sqft: Optional[float] = None
+    bedrooms: Optional[int] = None
+    bathrooms: Optional[int] = None
+    land_value: Optional[float] = None
+    improvement_value: Optional[float] = None
+
+
 class ParcelSummary(BaseModel):
     apn: str
     address: str
     lot_size_sqft: Optional[float] = None
     geometry: Optional[dict] = None  # GeoJSON
+    existing_property: Optional[ExistingProperty] = None
 
 
 class BuildingFootprint(BaseModel):
