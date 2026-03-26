@@ -7,6 +7,7 @@ import ParcelMap from '@/components/ParcelMap.vue'
 import ZoningSummary from '@/components/ZoningSummary.vue'
 import AssessmentPanel from '@/components/AssessmentPanel.vue'
 import BuildingTypeSelector from '@/components/BuildingTypeSelector.vue'
+import ChatPanel from '@/components/ChatPanel.vue'
 
 const store = useParcelStore()
 
@@ -76,6 +77,7 @@ function tryDemo(address: string) {
         <BuildingTypeSelector />
       </div>
       <AssessmentPanel />
+      <ChatPanel />
     </div>
   </div>
 </template>
