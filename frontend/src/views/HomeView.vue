@@ -9,35 +9,73 @@ import AssessmentPanel from '@/components/AssessmentPanel.vue'
 import BuildingTypeSelector from '@/components/BuildingTypeSelector.vue'
 
 const store = useParcelStore()
+
+const demoAddresses = [
+  { label: 'Westwood R1-1', address: '2021 Kelton Ave, Los Angeles, CA' },
+  { label: 'Mar Vista R1-1-O', address: '2335 Overland Ave, Los Angeles, CA' },
+  { label: 'Mid-City R3-1', address: '1525 S Saltair Ave, Los Angeles, CA' },
+  { label: 'Brentwood RE15', address: '11941 Brentwood Grove Dr, Los Angeles, CA' },
+  { label: 'Santa Monica', address: '1535 Ocean Ave, Santa Monica, CA' },
+]
+
+function tryDemo(address: string) {
+  store.searchAddress(address)
+}
 </script>
 
 <template>
   <div class="home">
-    <section class="search-section">
-      <AddressSearch />
+    <!-- Hero -->
+    <section class="hero" v-if="!store.parcelData">
+      <h1>What can you build?</h1>
+      <p class="hero-sub">
+        Enter a residential address in Los Angeles to get an evidence-backed
+        buildability assessment with zoning constraints, citations, and confidence scoring.
+      </p>
     </section>
 
+    <!-- Search -->
+    <section class="search-section" :class="{ compact: !!store.parcelData }">
+      <AddressSearch />
+      <div class="demo-row" v-if="!store.parcelData">
+        <span class="demo-label">Try a demo address</span>
+        <div class="demo-chips">
+          <button
+            v-for="d in demoAddresses"
+            :key="d.address"
+            class="demo-chip"
+            @click="tryDemo(d.address)"
+            :disabled="store.loading"
+          >
+            {{ d.label }}
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Candidate selection -->
     <CandidateList
       v-if="store.candidates.length > 1 && store.needsConfirmation"
     />
 
+    <!-- Pipeline progress -->
     <PipelineProgress
-      v-if="store.pipelineSteps.length > 0"
+      v-if="store.pipelineSteps.length > 0 && !store.parcelData"
     />
 
+    <!-- Error -->
     <div v-if="store.error" class="error-banner">
       {{ store.error }}
     </div>
 
-    <div v-if="store.parcelData" class="results-grid">
-      <div class="left-col">
-        <ParcelMap />
+    <!-- Results -->
+    <div v-if="store.parcelData" class="results">
+      <ParcelMap />
+      <div class="controls-row">
         <ZoningSummary />
-      </div>
-      <div class="right-col">
         <BuildingTypeSelector />
-        <AssessmentPanel />
       </div>
+      <AssessmentPanel />
     </div>
   </div>
 </template>
@@ -46,40 +84,109 @@ const store = useParcelStore()
 .home {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+}
+
+.hero {
+  text-align: center;
+  padding: 80px 20px 0;
+}
+
+.hero h1 {
+  font-size: 48px;
+  font-weight: 700;
+  letter-spacing: -1.5px;
+  margin-bottom: 16px;
+}
+
+.hero-sub {
+  font-size: 17px;
+  color: #666;
+  max-width: 560px;
+  margin: 0 auto;
+  line-height: 1.6;
 }
 
 .search-section {
+  padding: 40px 0 20px;
+  max-width: 700px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.search-section.compact {
+  padding: 24px 0 16px;
+  max-width: 100%;
+}
+
+.demo-row {
+  text-align: center;
+  margin-top: 24px;
+}
+
+.demo-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: #bbb;
+  display: block;
+  margin-bottom: 12px;
+}
+
+.demo-chips {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+}
+
+.demo-chip {
+  padding: 8px 16px;
+  border: 1px solid #e0e0e0;
+  border-radius: 100px;
   background: #fff;
-  padding: 24px;
-  border-radius: 8px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  font-size: 13px;
+  color: #666;
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: inherit;
+}
+
+.demo-chip:hover:not(:disabled) {
+  border-color: #1a1a1a;
+  color: #1a1a1a;
+}
+
+.demo-chip:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
 }
 
 .error-banner {
-  background: #fee;
-  color: #c00;
-  padding: 12px 16px;
+  background: #fef2f2;
+  color: #991b1b;
+  padding: 12px 20px;
   border-radius: 8px;
-  border: 1px solid #fcc;
+  border: 1px solid #fecaca;
+  font-size: 14px;
+  margin: 12px 0;
 }
 
-.results-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 20px;
-}
-
-.left-col,
-.right-col {
+.results {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 12px;
+  padding-bottom: 80px;
+}
+
+.controls-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
 }
 
 @media (max-width: 900px) {
-  .results-grid {
-    grid-template-columns: 1fr;
-  }
+  .hero h1 { font-size: 32px; }
 }
 </style>

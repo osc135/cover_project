@@ -4,6 +4,12 @@ import { useParcelStore } from '@/stores/parcel'
 const store = useParcelStore()
 const types = ['SFH', 'ADU', 'GuestHouse']
 
+const labels: Record<string, string> = {
+  SFH: 'Single Family',
+  ADU: 'ADU',
+  GuestHouse: 'Guest House',
+}
+
 function select(type: string) {
   store.assess(type)
 }
@@ -11,8 +17,8 @@ function select(type: string) {
 
 <template>
   <div class="building-type-selector">
-    <h3>Building Type</h3>
-    <div class="type-buttons">
+    <span class="selector-label">Assess for</span>
+    <div class="type-pills">
       <button
         v-for="t in types"
         :key="t"
@@ -20,7 +26,7 @@ function select(type: string) {
         @click="select(t)"
         :disabled="store.loading"
       >
-        {{ t === 'GuestHouse' ? 'Guest House' : t }}
+        {{ labels[t] }}
       </button>
     </div>
   </div>
@@ -28,44 +34,50 @@ function select(type: string) {
 
 <style scoped>
 .building-type-selector {
-  background: #fff;
-  padding: 16px 20px;
-  border-radius: 8px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-}
-
-h3 {
-  font-size: 14px;
-  font-weight: 600;
-  margin-bottom: 10px;
-  color: #444;
-}
-
-.type-buttons {
   display: flex;
-  gap: 8px;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0;
+}
+
+.selector-label {
+  font-size: 13px;
+  color: #999;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.type-pills {
+  display: flex;
+  gap: 6px;
 }
 
 button {
-  flex: 1;
-  padding: 10px;
-  border: 1px solid #e0e0e0;
-  border-radius: 6px;
+  padding: 8px 20px;
+  border: 1px solid #ddd;
+  border-radius: 100px;
   background: #fff;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 500;
+  font-family: inherit;
   transition: all 0.15s;
+  color: #666;
 }
 
 button.active {
-  background: #2563eb;
+  background: #1a1a1a;
   color: #fff;
-  border-color: #2563eb;
+  border-color: #1a1a1a;
 }
 
 button:hover:not(:disabled):not(.active) {
-  background: #f0f4ff;
-  border-color: #2563eb;
+  border-color: #1a1a1a;
+  color: #1a1a1a;
+}
+
+button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
 }
 </style>

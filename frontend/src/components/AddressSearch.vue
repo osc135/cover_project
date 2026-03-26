@@ -14,13 +14,11 @@ function handleSearch() {
 
 <template>
   <div class="address-search">
-    <label for="address-input">Enter a residential address or APN</label>
     <div class="input-row">
       <input
-        id="address-input"
         v-model="query"
         type="text"
-        placeholder="e.g. 1234 Main St, Los Angeles, CA"
+        placeholder="Enter a residential address or APN"
         @keyup.enter="handleSearch"
         :disabled="store.loading"
       />
@@ -32,49 +30,51 @@ function handleSearch() {
 </template>
 
 <style scoped>
-.address-search label {
-  display: block;
-  font-weight: 600;
-  margin-bottom: 8px;
-  font-size: 14px;
-  color: #444;
-}
-
 .input-row {
   display: flex;
-  gap: 8px;
+  gap: 0;
 }
 
 input {
   flex: 1;
-  padding: 10px 14px;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  font-size: 15px;
+  padding: 14px 20px;
+  border: 1px solid #ddd;
+  border-right: none;
+  border-radius: 8px 0 0 8px;
+  font-size: 16px;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.15s;
 }
 
 input:focus {
-  outline: none;
-  border-color: #2563eb;
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  border-color: #1a1a1a;
+}
+
+input::placeholder {
+  color: #bbb;
 }
 
 button {
-  padding: 10px 20px;
-  background: #2563eb;
+  padding: 14px 28px;
+  background: #1a1a1a;
   color: #fff;
-  border: none;
-  border-radius: 6px;
+  border: 1px solid #1a1a1a;
+  border-radius: 0 8px 8px 0;
   font-size: 15px;
+  font-weight: 500;
   cursor: pointer;
+  font-family: inherit;
+  transition: background 0.15s;
+  white-space: nowrap;
 }
 
 button:hover:not(:disabled) {
-  background: #1d4ed8;
+  background: #333;
 }
 
 button:disabled {
-  opacity: 0.5;
+  opacity: 0.4;
   cursor: not-allowed;
 }
 </style>

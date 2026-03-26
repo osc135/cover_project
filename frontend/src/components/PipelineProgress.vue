@@ -4,65 +4,76 @@ import { useParcelStore } from '@/stores/parcel'
 const store = useParcelStore()
 
 const stepLabels: Record<string, string> = {
-  parcel: 'Fetching parcel data',
-  zoning: 'Loading zoning designations',
-  overlays: 'Checking overlay zones',
-  buildings: 'Fetching building footprints',
-  storing: 'Saving data',
+  parcel: 'Parcel data',
+  zoning: 'Zoning designations',
+  overlays: 'Overlay zones',
+  buildings: 'Building footprints',
+  storing: 'Saving',
   complete: 'Complete',
-}
-
-function statusIcon(status: string) {
-  switch (status) {
-    case 'complete': return '✓'
-    case 'in_progress': return '⟳'
-    case 'error': return '✗'
-    default: return '·'
-  }
 }
 </script>
 
 <template>
-  <div class="pipeline-progress">
-    <div
-      v-for="step in store.pipelineSteps"
-      :key="step.step"
-      :class="['step', step.status]"
-    >
-      <span class="icon">{{ statusIcon(step.status) }}</span>
-      <span class="label">{{ stepLabels[step.step] || step.step }}</span>
-      <span v-if="step.detail && step.status === 'error'" class="detail">{{ step.detail }}</span>
+  <div class="pipeline">
+    <div class="steps">
+      <div
+        v-for="step in store.pipelineSteps"
+        :key="step.step"
+        :class="['step', step.status]"
+      >
+        <span class="dot"></span>
+        <span class="label">{{ stepLabels[step.step] || step.step }}</span>
+      </div>
+    </div>
+    <div v-if="store.pipelineSteps.some(s => s.status === 'error')" class="error-detail">
+      {{ store.pipelineSteps.find(s => s.status === 'error')?.detail }}
     </div>
   </div>
 </template>
 
 <style scoped>
-.pipeline-progress {
-  background: #fff;
-  padding: 16px 20px;
-  border-radius: 8px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+.pipeline {
+  max-width: 700px;
+  margin: 16px auto;
+  width: 100%;
+}
+
+.steps {
   display: flex;
-  flex-direction: column;
-  gap: 6px;
+  flex-wrap: wrap;
+  gap: 6px 16px;
 }
 
 .step {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 14px;
-  padding: 4px 0;
+  gap: 6px;
+  font-size: 13px;
+  color: #999;
 }
 
-.icon { font-weight: 700; width: 18px; text-align: center; }
-.step.complete .icon { color: #16a34a; }
-.step.in_progress .icon { color: #2563eb; }
-.step.error .icon { color: #dc2626; }
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #ddd;
+  flex-shrink: 0;
+}
 
-.detail {
-  color: #dc2626;
+.step.complete .dot { background: #1a1a1a; }
+.step.complete { color: #1a1a1a; }
+.step.in_progress .dot { background: #999; animation: pulse 1s infinite; }
+.step.error .dot { background: #dc2626; }
+.step.error { color: #dc2626; }
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+.error-detail {
   font-size: 12px;
-  margin-left: auto;
+  color: #dc2626;
+  margin-top: 8px;
 }
 </style>

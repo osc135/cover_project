@@ -6,49 +6,52 @@ const store = useParcelStore()
 
 <template>
   <div class="candidate-list">
-    <h3>Multiple addresses found — select one:</h3>
-    <ul>
-      <li
+    <p class="candidate-label">Multiple addresses found — select one:</p>
+    <div class="candidates">
+      <button
         v-for="(candidate, i) in store.candidates"
         :key="i"
         @click="store.selectCandidate(candidate)"
+        class="candidate-btn"
       >
         {{ candidate.formatted_address }}
-      </li>
-    </ul>
+      </button>
+    </div>
   </div>
 </template>
 
 <style scoped>
 .candidate-list {
-  background: #fff;
-  padding: 16px 20px;
+  max-width: 700px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.candidate-label {
+  font-size: 13px;
+  color: #888;
+  margin-bottom: 8px;
+}
+
+.candidates {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.candidate-btn {
+  padding: 12px 16px;
+  border: 1px solid #eee;
   border-radius: 8px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-}
-
-h3 {
-  font-size: 14px;
-  font-weight: 600;
-  margin-bottom: 10px;
-  color: #444;
-}
-
-ul {
-  list-style: none;
-}
-
-li {
-  padding: 10px 14px;
-  border: 1px solid #e0e0e0;
-  border-radius: 6px;
-  margin-bottom: 6px;
+  background: #fff;
   cursor: pointer;
-  transition: background 0.15s;
+  font-size: 14px;
+  font-family: inherit;
+  text-align: left;
+  transition: all 0.15s;
 }
 
-li:hover {
-  background: #f0f4ff;
-  border-color: #2563eb;
+.candidate-btn:hover {
+  border-color: #1a1a1a;
 }
 </style>
