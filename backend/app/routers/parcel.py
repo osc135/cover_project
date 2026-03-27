@@ -32,7 +32,12 @@ async def _stream_pipeline(req: ConfirmAddressRequest, db: AsyncSession):
 
     # 1 - Fetch parcel
     yield event("parcel", "in_progress", "Fetching parcel data from LA County...")
-    parcel_feature = await gis.fetch_parcel(lat, lng)
+    try:
+        parcel_feature = await gis.fetch_parcel(lat, lng)
+    except Exception as e:
+        logger.error(f"Parcel fetch failed: {e}")
+        yield event("parcel", "error", "LA County parcel service timed out — please try again")
+        return
     if not parcel_feature:
         yield event("parcel", "error", "No parcel found at this location")
         return
@@ -44,7 +49,11 @@ async def _stream_pipeline(req: ConfirmAddressRequest, db: AsyncSession):
 
     # 2 - Fetch zoning
     yield event("zoning", "in_progress", "Loading zoning designations...")
-    zoning_feature = await gis.fetch_zoning(lat, lng)
+    try:
+        zoning_feature = await gis.fetch_zoning(lat, lng)
+    except Exception as e:
+        logger.warning(f"Zoning fetch failed: {e}")
+        zoning_feature = None
     base_zone = None
     if zoning_feature:
         zprops = zoning_feature.get("properties", {})

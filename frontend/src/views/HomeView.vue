@@ -9,6 +9,7 @@ import AssessmentPanel from '@/components/AssessmentPanel.vue'
 import BuildingTypeSelector from '@/components/BuildingTypeSelector.vue'
 import ChatPanel from '@/components/ChatPanel.vue'
 import ExistingProperty from '@/components/ExistingProperty.vue'
+import ZoneStandards from '@/components/ZoneStandards.vue'
 
 const store = useParcelStore()
 
@@ -77,7 +78,10 @@ function tryDemo(address: string) {
         <ZoningSummary />
         <BuildingTypeSelector />
       </div>
-      <ExistingProperty />
+      <div class="info-columns">
+        <ExistingProperty />
+        <ZoneStandards />
+      </div>
       <AssessmentPanel />
       <ChatPanel />
     </div>
@@ -190,7 +194,14 @@ function tryDemo(address: string) {
   flex-wrap: wrap;
 }
 
+.info-columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
 @media (max-width: 900px) {
   .hero h1 { font-size: 32px; }
+  .info-columns { grid-template-columns: 1fr; }
 }
 </style>
