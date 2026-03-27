@@ -116,11 +116,3 @@ class ChatRequest(BaseModel):
 
 class ChatResponse(BaseModel):
     reply: str
-
-
-# --- Pipeline progress ---
-
-class PipelineStep(BaseModel):
-    step: str
-    status: str  # pending, in_progress, complete, error
-    detail: Optional[str] = None

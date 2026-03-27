@@ -346,13 +346,3 @@ export function getZoneStandards(baseZone: string): ZoneStandard | null {
 
   return null
 }
-
-/**
- * Extract the height district number from a zone string like "R1-1" or "RE15-1-H"
- */
-export function getHeightDistrict(baseZone: string): string | null {
-  if (!baseZone) return null
-  const cleaned = baseZone.replace(/^(\([A-Z]+\)|\[[A-Z]+\])+/g, '')
-  const parts = cleaned.split('-')
-  return parts.length > 1 ? parts[1] : null
-}

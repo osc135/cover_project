@@ -1,18 +1,13 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useParcelStore } from '@/stores/parcel'
-import { getZoneStandards, getHeightDistrict } from '@/data/zoneStandards'
+import { getZoneStandards } from '@/data/zoneStandards'
 
 const store = useParcelStore()
 
 const standards = computed(() => {
   if (!store.parcelData?.zoning.base_zone) return null
   return getZoneStandards(store.parcelData.zoning.base_zone)
-})
-
-const heightDistrict = computed(() => {
-  if (!store.parcelData?.zoning.base_zone) return null
-  return getHeightDistrict(store.parcelData.zoning.base_zone)
 })
 </script>
 

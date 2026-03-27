@@ -71,8 +71,21 @@ function tryDemo(address: string) {
       {{ store.error }}
     </div>
 
+    <!-- Out of jurisdiction -->
+    <div v-if="store.parcelData && !store.parcelData.zoning.base_zone" class="out-of-bounds">
+      <ParcelMap />
+      <div class="oob-message">
+        <h2>Outside coverage area</h2>
+        <p>
+          This parcel is outside the City of Los Angeles jurisdiction.
+          The regulatory engine currently only supports residential parcels within LA City limits.
+        </p>
+        <p class="oob-address">{{ store.parcelData.parcel.address }}</p>
+      </div>
+    </div>
+
     <!-- Results -->
-    <div v-if="store.parcelData" class="results">
+    <div v-if="store.parcelData && store.parcelData.zoning.base_zone" class="results">
       <ParcelMap />
       <div class="controls-row">
         <ZoningSummary />
@@ -192,6 +205,41 @@ function tryDemo(address: string) {
   justify-content: space-between;
   gap: 16px;
   flex-wrap: wrap;
+}
+
+.out-of-bounds {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-bottom: 80px;
+}
+
+.oob-message {
+  text-align: center;
+  padding: 48px 24px;
+  background: #fff;
+  border: 1px solid #eee;
+  border-radius: 12px;
+}
+
+.oob-message h2 {
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+.oob-message p {
+  font-size: 15px;
+  color: #666;
+  line-height: 1.6;
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+.oob-address {
+  margin-top: 16px;
+  font-weight: 600;
+  color: #999;
 }
 
 .info-columns {

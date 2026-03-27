@@ -56,11 +56,6 @@ export async function runAssessment(apn: string, buildingType: string): Promise<
   return data
 }
 
-export async function getAssessment(apn: string, buildingType: string): Promise<Assessment> {
-  const { data } = await api.get(`/assessment/${apn}/${buildingType}`)
-  return data
-}
-
 export async function chat(apn: string, message: string): Promise<string> {
   const { data } = await api.post('/chat', { apn, message })
   return data.reply
