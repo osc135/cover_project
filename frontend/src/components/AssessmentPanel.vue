@@ -144,6 +144,13 @@ function barColor(val: number) {
       </table>
     </div>
 
+    <div class="open-questions" v-if="store.assessment.open_questions?.length">
+      <h3>Open Questions</h3>
+      <ul>
+        <li v-for="(q, i) in store.assessment.open_questions" :key="i">{{ q }}</li>
+      </ul>
+    </div>
+
   </div>
 
   <div class="assessment-panel empty" v-else-if="store.parcelData && !store.loading">
