@@ -127,8 +127,8 @@ async def _stream_pipeline(req: ConfirmAddressRequest, db: AsyncSession):
                 """),
                 {
                     "apn": apn,
-                    "btype": bprops.get("UseType"),
-                    "sqft": bprops.get("Shape__Area"),
+                    "btype": bprops.get("CODE"),
+                    "sqft": bprops.get("Shape_Area") or bprops.get("AREA"),
                     "geom": bf_geom,
                 },
             )
@@ -164,8 +164,8 @@ async def _stream_pipeline(req: ConfirmAddressRequest, db: AsyncSession):
         ),
         buildings=[
             BuildingFootprint(
-                building_type=bf.get("properties", {}).get("UseType"),
-                sqft=bf.get("properties", {}).get("Shape__Area"),
+                building_type=bf.get("properties", {}).get("CODE"),
+                sqft=bf.get("properties", {}).get("Shape_Area") or bf.get("properties", {}).get("AREA"),
                 geometry=bf.get("geometry"),
             )
             for bf in building_features

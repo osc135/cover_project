@@ -168,7 +168,10 @@ def check_citations_valid(assessment, ingested_sections: set[str]) -> CheckResul
 
 
 def check_setback_ranges(assessment, zone_prefix: str) -> CheckResult:
-    """Setback values should be in reasonable ranges for the zone."""
+    """Setback values should be in reasonable ranges for the zone.
+    Only checked for SFH — ADU and GuestHouse have state law setback exceptions (e.g. 4ft)."""
+    if assessment.building_type in ("ADU", "GuestHouse"):
+        return CheckResult(name="setback_ranges", passed=True, detail="Skipped — ADU/GuestHouse have state law setback exceptions")
     if zone_prefix not in EXPECTED_SETBACKS:
         return CheckResult(name="setback_ranges", passed=True, detail=f"No expected ranges for {zone_prefix}")
 

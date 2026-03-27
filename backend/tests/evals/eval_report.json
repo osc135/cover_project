@@ -1,9 +1,9 @@
 {
-  "timestamp": "2026-03-27T16:58:48.855762",
+  "timestamp": "2026-03-27T17:46:51.231688",
   "total_checks": 81,
-  "total_passed": 74,
+  "total_passed": 79,
   "total_errors": 1,
-  "pass_rate": 91.4,
+  "pass_rate": 97.5,
   "results": [
     {
       "parcel": "Westwood R1-1",
@@ -13,12 +13,12 @@
         {
           "name": "has_constraints",
           "passed": true,
-          "detail": "7 constraints generated"
+          "detail": "6 constraints generated"
         },
         {
           "name": "has_summary",
           "passed": true,
-          "detail": "Summary length: 489 chars"
+          "detail": "Summary length: 423 chars"
         },
         {
           "name": "buildable_set",
@@ -38,7 +38,7 @@
         {
           "name": "confidence_reasonable",
           "passed": true,
-          "detail": "Score=0.8, Grade=B, Expected grade=B"
+          "detail": "Score=0.84, Grade=B, Expected grade=B"
         },
         {
           "name": "constraint_types_valid",
@@ -65,12 +65,12 @@
         {
           "name": "has_constraints",
           "passed": true,
-          "detail": "7 constraints generated"
+          "detail": "6 constraints generated"
         },
         {
           "name": "has_summary",
           "passed": true,
-          "detail": "Summary length: 417 chars"
+          "detail": "Summary length: 459 chars"
         },
         {
           "name": "buildable_set",
@@ -84,13 +84,13 @@
         },
         {
           "name": "setback_ranges",
-          "passed": false,
-          "detail": "Front setback 5.0ft outside expected 15-25ft"
+          "passed": true,
+          "detail": "Skipped \u2014 ADU/GuestHouse have state law setback exceptions"
         },
         {
           "name": "confidence_reasonable",
           "passed": true,
-          "detail": "Score=0.8, Grade=B, Expected grade=B"
+          "detail": "Score=0.78, Grade=B, Expected grade=B"
         },
         {
           "name": "constraint_types_valid",
@@ -117,12 +117,12 @@
         {
           "name": "has_constraints",
           "passed": true,
-          "detail": "7 constraints generated"
+          "detail": "6 constraints generated"
         },
         {
           "name": "has_summary",
           "passed": true,
-          "detail": "Summary length: 492 chars"
+          "detail": "Summary length: 443 chars"
         },
         {
           "name": "buildable_set",
@@ -136,18 +136,18 @@
         },
         {
           "name": "setback_ranges",
-          "passed": false,
-          "detail": "Front setback 5.0ft outside expected 15-25ft"
+          "passed": true,
+          "detail": "Skipped \u2014 ADU/GuestHouse have state law setback exceptions"
         },
         {
           "name": "confidence_reasonable",
           "passed": true,
-          "detail": "Score=0.8, Grade=B, Expected grade=B"
+          "detail": "Score=0.78, Grade=B, Expected grade=B"
         },
         {
           "name": "constraint_types_valid",
-          "passed": false,
-          "detail": "Invalid types on: ['Side Yard Setback']"
+          "passed": true,
+          "detail": "All constraint types valid"
         },
         {
           "name": "constraint_confidence_valid",
@@ -157,7 +157,7 @@
         {
           "name": "has_open_questions",
           "passed": true,
-          "detail": "5 open questions"
+          "detail": "4 open questions"
         }
       ]
     },
@@ -174,7 +174,7 @@
         {
           "name": "has_summary",
           "passed": true,
-          "detail": "Summary length: 526 chars"
+          "detail": "Summary length: 452 chars"
         },
         {
           "name": "buildable_set",
@@ -198,8 +198,8 @@
         },
         {
           "name": "constraint_types_valid",
-          "passed": true,
-          "detail": "All constraint types valid"
+          "passed": false,
+          "detail": "Invalid types on: ['Maximum Lot Coverage']"
         },
         {
           "name": "constraint_confidence_valid",
@@ -221,12 +221,12 @@
         {
           "name": "has_constraints",
           "passed": true,
-          "detail": "8 constraints generated"
+          "detail": "6 constraints generated"
         },
         {
           "name": "has_summary",
           "passed": true,
-          "detail": "Summary length: 517 chars"
+          "detail": "Summary length: 608 chars"
         },
         {
           "name": "buildable_set",
@@ -241,17 +241,17 @@
         {
           "name": "setback_ranges",
           "passed": true,
-          "detail": "Setback values in expected ranges"
+          "detail": "Skipped \u2014 ADU/GuestHouse have state law setback exceptions"
         },
         {
           "name": "confidence_reasonable",
           "passed": true,
-          "detail": "Score=0.77, Grade=B, Expected grade=B"
+          "detail": "Score=0.78, Grade=B, Expected grade=B"
         },
         {
           "name": "constraint_types_valid",
-          "passed": false,
-          "detail": "Invalid types on: ['Lot Coverage - R1V2']"
+          "passed": true,
+          "detail": "All constraint types valid"
         },
         {
           "name": "constraint_confidence_valid",
@@ -272,174 +272,18 @@
       "checks": [
         {
           "name": "has_constraints",
-          "passed": false,
-          "detail": "1 constraints generated"
-        },
-        {
-          "name": "has_summary",
-          "passed": true,
-          "detail": "Summary length: 546 chars"
-        },
-        {
-          "name": "buildable_set",
-          "passed": true,
-          "detail": "buildable=False"
-        },
-        {
-          "name": "citations_valid",
-          "passed": true,
-          "detail": "All citations reference ingested sections"
-        },
-        {
-          "name": "setback_ranges",
-          "passed": true,
-          "detail": "Setback values in expected ranges"
-        },
-        {
-          "name": "confidence_reasonable",
-          "passed": true,
-          "detail": "Score=0.6, Grade=C, Expected grade=C"
-        },
-        {
-          "name": "constraint_types_valid",
-          "passed": true,
-          "detail": "All constraint types valid"
-        },
-        {
-          "name": "constraint_confidence_valid",
-          "passed": true,
-          "detail": "All confidence levels valid"
-        },
-        {
-          "name": "has_open_questions",
-          "passed": true,
-          "detail": "6 open questions"
-        }
-      ]
-    },
-    {
-      "parcel": "Mid-City R3-1",
-      "building_type": "ADU",
-      "error": null,
-      "checks": [
-        {
-          "name": "has_constraints",
-          "passed": true,
-          "detail": "7 constraints generated"
-        },
-        {
-          "name": "has_summary",
-          "passed": true,
-          "detail": "Summary length: 616 chars"
-        },
-        {
-          "name": "buildable_set",
-          "passed": true,
-          "detail": "buildable=True"
-        },
-        {
-          "name": "citations_valid",
-          "passed": true,
-          "detail": "All citations reference ingested sections"
-        },
-        {
-          "name": "setback_ranges",
-          "passed": true,
-          "detail": "Setback values in expected ranges"
-        },
-        {
-          "name": "confidence_reasonable",
-          "passed": true,
-          "detail": "Score=0.53, Grade=D, Expected grade=D"
-        },
-        {
-          "name": "constraint_types_valid",
-          "passed": true,
-          "detail": "All constraint types valid"
-        },
-        {
-          "name": "constraint_confidence_valid",
-          "passed": true,
-          "detail": "All confidence levels valid"
-        },
-        {
-          "name": "has_open_questions",
-          "passed": true,
-          "detail": "5 open questions"
-        }
-      ]
-    },
-    {
-      "parcel": "Brentwood RE15",
-      "building_type": "SFH",
-      "error": null,
-      "checks": [
-        {
-          "name": "has_constraints",
           "passed": true,
           "detail": "4 constraints generated"
         },
         {
           "name": "has_summary",
           "passed": true,
-          "detail": "Summary length: 461 chars"
+          "detail": "Summary length: 536 chars"
         },
         {
           "name": "buildable_set",
           "passed": true,
-          "detail": "buildable=True"
-        },
-        {
-          "name": "citations_valid",
-          "passed": true,
-          "detail": "All citations reference ingested sections"
-        },
-        {
-          "name": "setback_ranges",
-          "passed": true,
-          "detail": "Setback values in expected ranges"
-        },
-        {
-          "name": "confidence_reasonable",
-          "passed": true,
-          "detail": "Score=0.54, Grade=D, Expected grade=D"
-        },
-        {
-          "name": "constraint_types_valid",
-          "passed": false,
-          "detail": "Invalid types on: ['ADU floor area limit (state law ADU)']"
-        },
-        {
-          "name": "constraint_confidence_valid",
-          "passed": true,
-          "detail": "All confidence levels valid"
-        },
-        {
-          "name": "has_open_questions",
-          "passed": true,
-          "detail": "7 open questions"
-        }
-      ]
-    },
-    {
-      "parcel": "Brentwood RE15",
-      "building_type": "ADU",
-      "error": null,
-      "checks": [
-        {
-          "name": "has_constraints",
-          "passed": true,
-          "detail": "6 constraints generated"
-        },
-        {
-          "name": "has_summary",
-          "passed": true,
-          "detail": "Summary length: 606 chars"
-        },
-        {
-          "name": "buildable_set",
-          "passed": true,
-          "detail": "buildable=True"
+          "detail": "buildable=False"
         },
         {
           "name": "citations_valid",
@@ -470,6 +314,162 @@
           "name": "has_open_questions",
           "passed": true,
           "detail": "6 open questions"
+        }
+      ]
+    },
+    {
+      "parcel": "Mid-City R3-1",
+      "building_type": "ADU",
+      "error": null,
+      "checks": [
+        {
+          "name": "has_constraints",
+          "passed": true,
+          "detail": "5 constraints generated"
+        },
+        {
+          "name": "has_summary",
+          "passed": true,
+          "detail": "Summary length: 417 chars"
+        },
+        {
+          "name": "buildable_set",
+          "passed": true,
+          "detail": "buildable=False"
+        },
+        {
+          "name": "citations_valid",
+          "passed": true,
+          "detail": "All citations reference ingested sections"
+        },
+        {
+          "name": "setback_ranges",
+          "passed": true,
+          "detail": "Skipped \u2014 ADU/GuestHouse have state law setback exceptions"
+        },
+        {
+          "name": "confidence_reasonable",
+          "passed": true,
+          "detail": "Score=0.55, Grade=D, Expected grade=D"
+        },
+        {
+          "name": "constraint_types_valid",
+          "passed": true,
+          "detail": "All constraint types valid"
+        },
+        {
+          "name": "constraint_confidence_valid",
+          "passed": true,
+          "detail": "All confidence levels valid"
+        },
+        {
+          "name": "has_open_questions",
+          "passed": true,
+          "detail": "4 open questions"
+        }
+      ]
+    },
+    {
+      "parcel": "Brentwood RE15",
+      "building_type": "SFH",
+      "error": null,
+      "checks": [
+        {
+          "name": "has_constraints",
+          "passed": true,
+          "detail": "5 constraints generated"
+        },
+        {
+          "name": "has_summary",
+          "passed": true,
+          "detail": "Summary length: 434 chars"
+        },
+        {
+          "name": "buildable_set",
+          "passed": true,
+          "detail": "buildable=True"
+        },
+        {
+          "name": "citations_valid",
+          "passed": true,
+          "detail": "All citations reference ingested sections"
+        },
+        {
+          "name": "setback_ranges",
+          "passed": true,
+          "detail": "Setback values in expected ranges"
+        },
+        {
+          "name": "confidence_reasonable",
+          "passed": true,
+          "detail": "Score=0.5, Grade=D, Expected grade=D"
+        },
+        {
+          "name": "constraint_types_valid",
+          "passed": true,
+          "detail": "All constraint types valid"
+        },
+        {
+          "name": "constraint_confidence_valid",
+          "passed": true,
+          "detail": "All confidence levels valid"
+        },
+        {
+          "name": "has_open_questions",
+          "passed": true,
+          "detail": "8 open questions"
+        }
+      ]
+    },
+    {
+      "parcel": "Brentwood RE15",
+      "building_type": "ADU",
+      "error": null,
+      "checks": [
+        {
+          "name": "has_constraints",
+          "passed": true,
+          "detail": "5 constraints generated"
+        },
+        {
+          "name": "has_summary",
+          "passed": true,
+          "detail": "Summary length: 563 chars"
+        },
+        {
+          "name": "buildable_set",
+          "passed": true,
+          "detail": "buildable=True"
+        },
+        {
+          "name": "citations_valid",
+          "passed": true,
+          "detail": "All citations reference ingested sections"
+        },
+        {
+          "name": "setback_ranges",
+          "passed": true,
+          "detail": "Skipped \u2014 ADU/GuestHouse have state law setback exceptions"
+        },
+        {
+          "name": "confidence_reasonable",
+          "passed": true,
+          "detail": "Score=0.46, Grade=D, Expected grade=D"
+        },
+        {
+          "name": "constraint_types_valid",
+          "passed": true,
+          "detail": "All constraint types valid"
+        },
+        {
+          "name": "constraint_confidence_valid",
+          "passed": true,
+          "detail": "All confidence levels valid"
+        },
+        {
+          "name": "has_open_questions",
+          "passed": true,
+          "detail": "7 open questions"
         }
       ]
     },

@@ -30,18 +30,22 @@ You MUST return valid JSON matching this schema:
 
 Rules:
 - Only cite LAMC sections that appear in the provided regulatory text
-- Mark constraints as "deterministic" when the rule is directly stated and data is complete
-- Mark constraints as "interpretive" when you must infer or the rule is ambiguous
+- The "type" field MUST be exactly "deterministic" or "interpretive" — no other values
+  - "deterministic" = rule is directly stated in the code and data is complete
+  - "interpretive" = you must infer, the rule is ambiguous, or data is incomplete
 - Confidence score should reflect the proportion of HIGH vs MEDIUM vs LOW constraints
 - Grade: A=90%+, B=75-89%, C=60-74%, D=<60%
 - If an overlay zone applies but rules aren't provided, add it to open_questions
-- When lot_width_ft and lot_depth_ft are provided, USE THEM to calculate exact setback distances
-  - Front yard setback: calculate using the formula in the code (e.g., 20% of lot depth, max 20ft) and show the CALCULATED value
+- ALWAYS include the BASE ZONE setbacks (front, side, rear) as separate constraints using the zone's own rules
+  - Front yard setback: calculate using the base zone formula (e.g., 20% of lot depth, max 20ft for R1) and show the CALCULATED value
   - Side yard setback: calculate using lot width if the code specifies a percentage
+  - Rear yard setback: use the base zone minimum
   - Show your math in the applied_to_parcel field (e.g., "20% of 95ft depth = 19ft")
+  - For ADU assessments, include BOTH the base zone setbacks AND any ADU-specific setback exceptions as separate constraints
 - Calculate floor area ratio using lot_size_sqft to show maximum buildable square footage
 - Calculate lot coverage percentage limits using lot_size_sqft
 - Always show specific numeric values, not just the formula
+- Generate at least 3 constraints for any assessment
 """
 
 
