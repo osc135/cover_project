@@ -17,6 +17,14 @@ class Settings(BaseSettings):
         env_file = str(ENV_FILE)
         extra = "ignore"
 
+    @property
+    def async_database_url(self) -> str:
+        """Ensure the database URL uses the asyncpg driver."""
+        url = self.database_url
+        if url.startswith("postgresql://"):
+            url = url.replace("postgresql://", "postgresql+asyncpg://", 1)
+        return url
+
 
 @lru_cache
 def get_settings() -> Settings:
