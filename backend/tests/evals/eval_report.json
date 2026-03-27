@@ -1,0 +1,161 @@
+{
+  "timestamp": "2026-03-27T10:38:46.264341",
+  "total_checks": 18,
+  "total_passed": 18,
+  "total_errors": 8,
+  "pass_rate": 100.0,
+  "results": [
+    {
+      "parcel": "Westwood R1-1",
+      "building_type": "SFH",
+      "error": "Error code: 529 - {'type': 'error', 'error': {'type': 'overloaded_error', 'message': 'Overloaded'}, 'request_id': 'req_011CZTqKBGNsz3Zv5FxSGADq'}",
+      "checks": []
+    },
+    {
+      "parcel": "Westwood R1-1",
+      "building_type": "ADU",
+      "error": "Error code: 529 - {'type': 'error', 'error': {'type': 'overloaded_error', 'message': 'Overloaded'}, 'request_id': 'req_011CZTqKV4SqNgQ84j5ygBDV'}",
+      "checks": []
+    },
+    {
+      "parcel": "Westwood R1-1",
+      "building_type": "GuestHouse",
+      "error": "Error code: 529 - {'type': 'error', 'error': {'type': 'overloaded_error', 'message': 'Overloaded'}, 'request_id': 'req_011CZTqKnGJPoLZyBRyLH5mU'}",
+      "checks": []
+    },
+    {
+      "parcel": "Mar Vista R1-1-O",
+      "building_type": "SFH",
+      "error": "Error code: 529 - {'type': 'error', 'error': {'type': 'overloaded_error', 'message': 'Overloaded'}, 'request_id': 'req_011CZTqL4vuhBx2vb4Ecba86'}",
+      "checks": []
+    },
+    {
+      "parcel": "Mar Vista R1-1-O",
+      "building_type": "ADU",
+      "error": "Error code: 529 - {'type': 'error', 'error': {'type': 'overloaded_error', 'message': 'Overloaded'}, 'request_id': 'req_011CZTqLP1qsKBndiYA2jS3d'}",
+      "checks": []
+    },
+    {
+      "parcel": "Mid-City R3-1",
+      "building_type": "SFH",
+      "error": "Error code: 529 - {'type': 'error', 'error': {'type': 'overloaded_error', 'message': 'Overloaded'}, 'request_id': 'req_011CZTqLesKyi13BYbPeFgBv'}",
+      "checks": []
+    },
+    {
+      "parcel": "Mid-City R3-1",
+      "building_type": "ADU",
+      "error": null,
+      "checks": [
+        {
+          "name": "has_constraints",
+          "passed": true,
+          "detail": "6 constraints generated"
+        },
+        {
+          "name": "has_summary",
+          "passed": true,
+          "detail": "Summary length: 407 chars"
+        },
+        {
+          "name": "buildable_set",
+          "passed": true,
+          "detail": "buildable=False"
+        },
+        {
+          "name": "citations_valid",
+          "passed": true,
+          "detail": "All citations reference ingested sections"
+        },
+        {
+          "name": "setback_ranges",
+          "passed": true,
+          "detail": "Setback values in expected ranges"
+        },
+        {
+          "name": "confidence_reasonable",
+          "passed": true,
+          "detail": "Score=0.6, Grade=C, Expected grade=C"
+        },
+        {
+          "name": "constraint_types_valid",
+          "passed": true,
+          "detail": "All constraint types valid"
+        },
+        {
+          "name": "constraint_confidence_valid",
+          "passed": true,
+          "detail": "All confidence levels valid"
+        },
+        {
+          "name": "has_open_questions",
+          "passed": true,
+          "detail": "4 open questions"
+        }
+      ]
+    },
+    {
+      "parcel": "Brentwood RE15",
+      "building_type": "SFH",
+      "error": null,
+      "checks": [
+        {
+          "name": "has_constraints",
+          "passed": true,
+          "detail": "5 constraints generated"
+        },
+        {
+          "name": "has_summary",
+          "passed": true,
+          "detail": "Summary length: 608 chars"
+        },
+        {
+          "name": "buildable_set",
+          "passed": true,
+          "detail": "buildable=True"
+        },
+        {
+          "name": "citations_valid",
+          "passed": true,
+          "detail": "All citations reference ingested sections"
+        },
+        {
+          "name": "setback_ranges",
+          "passed": true,
+          "detail": "Setback values in expected ranges"
+        },
+        {
+          "name": "confidence_reasonable",
+          "passed": true,
+          "detail": "Score=0.55, Grade=D, Expected grade=D"
+        },
+        {
+          "name": "constraint_types_valid",
+          "passed": true,
+          "detail": "All constraint types valid"
+        },
+        {
+          "name": "constraint_confidence_valid",
+          "passed": true,
+          "detail": "All confidence levels valid"
+        },
+        {
+          "name": "has_open_questions",
+          "passed": true,
+          "detail": "6 open questions"
+        }
+      ]
+    },
+    {
+      "parcel": "Brentwood RE15",
+      "building_type": "ADU",
+      "error": "Error code: 529 - {'type': 'error', 'error': {'type': 'overloaded_error', 'message': 'Overloaded'}, 'request_id': 'req_011CZTqPzDVsE7uStvTGf5rh'}",
+      "checks": []
+    },
+    {
+      "parcel": "Santa Monica (out of jurisdiction)",
+      "building_type": "SFH",
+      "error": "No parcel found",
+      "checks": []
+    }
+  ]
+}

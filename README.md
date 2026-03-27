@@ -96,6 +96,8 @@ The frontend displays:
 - Structured constraints table with confidence color coding
 - Open questions for professional review
 
+> **Note:** Parcel and building boundaries are approximate. The LA County GIS parcel data is stored in EPSG:3857 (Web Mercator) and reprojected to WGS84 for display. Minor misalignment with Google Maps satellite imagery is expected — this is a known limitation of overlaying independent GIS and aerial imagery sources, not a data error.
+
 ## Tech Stack
 
 | Layer | Technology |

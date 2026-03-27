@@ -28,28 +28,52 @@ async def retrieve_chunks(
 
     embedding_str = "[" + ",".join(str(x) for x in embedding) + "]"
 
-    sql = text("""
+    # Split query: zone-specific chunks + general chunks
+    # Guarantees zone-specific rules are always included even when
+    # outnumbered by general provisions
+    zone_k = top_k // 2
+    general_k = top_k - zone_k
+
+    zone_sql = text("""
         SELECT section_id, zone, topic, text, source_url,
                embedding <=> cast(:embedding as vector) AS distance
         FROM regulatory_chunks
-        WHERE zone = :zone OR zone IS NULL
+        WHERE zone = :zone
         ORDER BY embedding <=> cast(:embedding as vector)
         LIMIT :top_k
     """)
 
-    result = await db.execute(
-        sql,
-        {"embedding": embedding_str, "zone": zone, "top_k": top_k},
-    )
-    rows = result.fetchall()
+    general_sql = text("""
+        SELECT section_id, zone, topic, text, source_url,
+               embedding <=> cast(:embedding as vector) AS distance
+        FROM regulatory_chunks
+        WHERE zone IS NULL
+        ORDER BY embedding <=> cast(:embedding as vector)
+        LIMIT :top_k
+    """)
 
-    return [
-        {
-            "section_id": row.section_id,
-            "zone": row.zone,
-            "topic": row.topic,
-            "text": row.text,
-            "source_url": row.source_url,
-        }
-        for row in rows
-    ]
+    zone_result = await db.execute(
+        zone_sql, {"embedding": embedding_str, "zone": zone, "top_k": zone_k},
+    )
+    zone_rows = zone_result.fetchall()
+
+    general_result = await db.execute(
+        general_sql, {"embedding": embedding_str, "top_k": general_k},
+    )
+    general_rows = general_result.fetchall()
+
+    # Combine, dedup by text, zone-specific first
+    seen = set()
+    chunks = []
+    for row in list(zone_rows) + list(general_rows):
+        if row.text not in seen:
+            seen.add(row.text)
+            chunks.append({
+                "section_id": row.section_id,
+                "zone": row.zone,
+                "topic": row.topic,
+                "text": row.text,
+                "source_url": row.source_url,
+            })
+
+    return chunks

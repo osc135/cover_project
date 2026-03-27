@@ -12,6 +12,7 @@ export const useParcelStore = defineStore('parcel', () => {
   const loading = ref(false)
   const error = ref<string | null>(null)
   const selectedBuildingType = ref('SFH')
+  const addressLatLng = ref<{ lat: number; lng: number } | null>(null)
 
   async function searchAddress(address: string) {
     loading.value = true
@@ -54,6 +55,7 @@ export const useParcelStore = defineStore('parcel', () => {
 
       if (result) {
         parcelData.value = result
+        addressLatLng.value = { lat: candidate.lat, lng: candidate.lng }
       }
     } catch (e: any) {
       error.value = e.message || 'Pipeline failed'
@@ -91,6 +93,7 @@ export const useParcelStore = defineStore('parcel', () => {
     loading,
     error,
     selectedBuildingType,
+    addressLatLng,
     searchAddress,
     selectCandidate,
     assess,

@@ -33,7 +33,11 @@ SECTION_ZONE_MAP = {
     "12.11": "R5",    # R5 Multiple Dwelling
     "12.21": None,    # General Provisions — applies to all zones
     "12.21.1": None,  # Height of buildings
+    "12.21.2": None,  # Floor area exceptions
     "12.22": None,    # Exceptions / accessory uses / ADU
+    "12.23": None,    # Nonconforming buildings and uses
+    "12.24": None,    # Conditional use permits / ADU ordinance
+    "12.24.1": None,  # Further ADU provisions
 }
 
 # Regex to detect section headers

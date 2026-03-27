@@ -35,6 +35,13 @@ Rules:
 - Confidence score should reflect the proportion of HIGH vs MEDIUM vs LOW constraints
 - Grade: A=90%+, B=75-89%, C=60-74%, D=<60%
 - If an overlay zone applies but rules aren't provided, add it to open_questions
+- When lot_width_ft and lot_depth_ft are provided, USE THEM to calculate exact setback distances
+  - Front yard setback: calculate using the formula in the code (e.g., 20% of lot depth, max 20ft) and show the CALCULATED value
+  - Side yard setback: calculate using lot width if the code specifies a percentage
+  - Show your math in the applied_to_parcel field (e.g., "20% of 95ft depth = 19ft")
+- Calculate floor area ratio using lot_size_sqft to show maximum buildable square footage
+- Calculate lot coverage percentage limits using lot_size_sqft
+- Always show specific numeric values, not just the formula
 """
 
 

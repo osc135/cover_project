@@ -117,7 +117,7 @@ async def assess(req: AssessRequest, db: AsyncSession = Depends(get_db)):
 
     # Load parcel data
     parcel_row = await db.execute(
-        text("SELECT apn, address, lot_size_sqft FROM parcels WHERE apn = :apn"),
+        text("SELECT apn, address, lot_size_sqft, geometry FROM parcels WHERE apn = :apn"),
         {"apn": req.apn},
     )
     parcel = parcel_row.fetchone()
@@ -148,11 +148,46 @@ async def assess(req: AssessRequest, db: AsyncSession = Depends(get_db)):
     zone_prefix = zone_clean.split("-")[0] if zone_clean else "R1"
     chunks = await retrieve_chunks(db, zone_prefix, req.building_type)
 
+    # Calculate lot dimensions from geometry
+    import math
+    lot_width_ft = None
+    lot_depth_ft = None
+    geometry = parcel.geometry
+    if isinstance(geometry, str):
+        geometry = json.loads(geometry)
+    if geometry and geometry.get("coordinates"):
+        coords = geometry["coordinates"][0] if geometry["type"] == "Polygon" else geometry["coordinates"][0][0]
+        # At LA latitude: 1 degree lat ≈ 364,000 ft, 1 degree lng ≈ 288,000 ft
+        FT_PER_LAT = 364000
+        FT_PER_LNG = 288000
+
+        # Calculate all edge lengths
+        edges = []
+        for i in range(len(coords) - 1):
+            dx = (coords[i+1][0] - coords[i][0]) * FT_PER_LNG
+            dy = (coords[i+1][1] - coords[i][1]) * FT_PER_LAT
+            length = math.sqrt(dx*dx + dy*dy)
+            mid = [(coords[i][0] + coords[i+1][0]) / 2, (coords[i][1] + coords[i+1][1]) / 2]
+            edges.append({"idx": i, "length": length, "mid": mid})
+
+        if len(edges) >= 4:
+            # Sort edges by length — typically the two longer edges are depth, two shorter are width
+            # But more accurately: use edge orientations
+            # For now, use a simpler heuristic: lot width ≈ shorter pair, lot depth ≈ longer pair
+            sorted_edges = sorted(edges, key=lambda e: e["length"])
+            lot_width_ft = round((sorted_edges[0]["length"] + sorted_edges[1]["length"]) / 2, 1)
+            lot_depth_ft = round((sorted_edges[-1]["length"] + sorted_edges[-2]["length"]) / 2, 1)
+            # Ensure width < depth (convention)
+            if lot_width_ft > lot_depth_ft:
+                lot_width_ft, lot_depth_ft = lot_depth_ft, lot_width_ft
+
     # Build context dicts
     parcel_data = {
         "apn": parcel.apn,
         "address": parcel.address,
         "lot_size_sqft": parcel.lot_size_sqft,
+        "lot_width_ft": lot_width_ft,
+        "lot_depth_ft": lot_depth_ft,
     }
     zoning_data = {
         "base_zone": zoning.base_zone,
