@@ -110,7 +110,7 @@ The frontend displays:
 | LLM (Assessment) | Claude API (Anthropic) |
 | LLM (Chat) | GPT-4o (OpenAI) |
 | Embeddings | OpenAI text-embedding-3-small |
-| Infrastructure | Docker Compose (Postgres), AWS for production |
+| Infrastructure | Railway (current), Docker Compose (local) |
 
 ## Regulatory Coverage
 
@@ -133,9 +133,16 @@ The frontend displays:
 | All | 12.21 / 12.21.1 | Height districts, FAR |
 | All | 12.22 | Exceptions, ADU rules |
 
-## Production Architecture
+## Deployment
 
-For production deployment on AWS:
+Currently deployed on **Railway** with a single-service architecture:
+- **App**: Dockerfile builds the Vue frontend and serves it from FastAPI
+- **Database**: Railway-managed PostgreSQL with PGVector extension
+- **Secrets**: Railway environment variables for API keys
+
+### Recommended Production Architecture (AWS)
+
+For production at scale, the recommended architecture separates concerns:
 
 ```
                     +-------------+
@@ -206,6 +213,24 @@ npm run dev
 ```
 
 Open `http://localhost:5173`
+
+## If I Had More Time
+
+**Performance & UX**
+- Loading spinners for each section (map, assessment, chat) so users see progress instead of blank space
+- Faster assessment pipeline — pre-fetch regulatory chunks during parcel loading so the LLM call starts immediately when the user picks a building type
+- Search history so users can revisit previously assessed parcels without re-querying
+
+**Accuracy & Reliability**
+- More reliable confidence scores — validate LLM-generated setback values against the deterministic zone standards and flag discrepancies automatically
+- Structured output enforcement via tool use or JSON mode instead of prompt-based JSON parsing
+- Retry logic on LLM calls with exponential backoff
+
+**Features**
+- Setback geometry drawn on the map — the parcel polygon and zone standards data are already there, just need to compute and render the inset lines
+- User feedback mechanism (thumbs up/down) on assessments to flag errors and build a dataset for improving prompts
+- Expand jurisdiction coverage — the architecture supports new cities by adding their zoning PDF and GIS endpoints without changing the pipeline
+- Project-specific inputs (bedrooms, bathrooms, target sqft) that feed into the assessment context
 
 ## Data Sources
 

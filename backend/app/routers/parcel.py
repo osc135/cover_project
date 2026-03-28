@@ -30,6 +30,52 @@ async def _stream_pipeline(req: ConfirmAddressRequest, db: AsyncSession):
 
     lat, lng = req.lat, req.lng
 
+    # Check if we already have a parcel near this location cached
+    existing = await db.execute(
+        text("SELECT apn FROM parcels WHERE address = :addr LIMIT 1"),
+        {"addr": req.formatted_address},
+    )
+    cached_row = existing.fetchone()
+    if cached_row:
+        logger.info(f"Cache hit for {req.formatted_address} — returning stored parcel {cached_row.apn}")
+        # Return cached data via the GET endpoint logic
+        p_row = await db.execute(text("SELECT apn, address, lot_size_sqft, geometry FROM parcels WHERE apn = :apn"), {"apn": cached_row.apn})
+        parcel_rec = p_row.fetchone()
+        b_rows = await db.execute(text("SELECT building_type, sqft, geometry FROM buildings WHERE apn = :apn"), {"apn": cached_row.apn})
+        z_row = await db.execute(text("SELECT * FROM zoning_designations WHERE apn = :apn"), {"apn": cached_row.apn})
+        zoning_rec = z_row.fetchone()
+
+        props_row = parcel_rec
+        existing_prop = ExistingProperty()
+        # Re-fetch property details from raw parcel attributes if available
+        result = ParcelResponse(
+            parcel=ParcelSummary(
+                apn=props_row.apn,
+                address=props_row.address,
+                lot_size_sqft=props_row.lot_size_sqft,
+                geometry=props_row.geometry,
+            ),
+            buildings=[
+                BuildingFootprint(building_type=b.building_type, sqft=b.sqft, geometry=b.geometry)
+                for b in b_rows.fetchall()
+            ],
+            zoning=ZoningInfo(
+                base_zone=zoning_rec.base_zone if zoning_rec else None,
+                hillside=zoning_rec.hillside if zoning_rec else False,
+                coastal_zone=zoning_rec.coastal_zone if zoning_rec else False,
+                fire_hazard=zoning_rec.fire_hazard if zoning_rec else None,
+                hpoz=zoning_rec.hpoz if zoning_rec else False,
+                specific_plan=zoning_rec.specific_plan if zoning_rec else None,
+                flood_zone=zoning_rec.flood_zone if zoning_rec else None,
+            ),
+        )
+        yield event("parcel", "complete")
+        yield event("zoning", "complete")
+        yield event("overlays", "complete")
+        yield event("buildings", "complete")
+        yield event("complete", "complete", result.model_dump_json())
+        return
+
     # 1 - Fetch parcel
     yield event("parcel", "in_progress", "Fetching parcel data from LA County...")
     try:
