@@ -93,31 +93,43 @@ async def _stream_pipeline(req: ConfirmAddressRequest, db: AsyncSession):
     logger.info(f"Parcel {apn}: lot_size={lot_size}, use={props.get('UseType')}, beds={props.get('Bedrooms1')}, sqft={props.get('SQFTmain1')}")
     yield event("parcel", "complete")
 
-    # 2 - Fetch zoning
+    # 2/3/4 - Fetch zoning, overlays, and buildings in parallel
     yield event("zoning", "in_progress", "Loading zoning designations...")
-    try:
-        zoning_feature = await gis.fetch_zoning(lat, lng)
-    except Exception as e:
-        logger.warning(f"Zoning fetch failed: {e}")
-        zoning_feature = None
+    yield event("overlays", "in_progress", "Checking overlay zones...")
+    yield event("buildings", "in_progress", "Fetching existing building footprints...")
+
+    async def _fetch_zoning():
+        try:
+            return await gis.fetch_zoning(lat, lng)
+        except Exception as e:
+            logger.warning(f"Zoning fetch failed: {e}")
+            return None
+
+    async def _fetch_overlays():
+        try:
+            return await gis.fetch_overlays(lat, lng)
+        except Exception as e:
+            logger.warning(f"Overlays fetch failed: {e}")
+            return {}
+
+    async def _fetch_buildings():
+        try:
+            return await gis.fetch_buildings(lat, lng)
+        except Exception as e:
+            logger.warning(f"Buildings fetch failed: {e}")
+            return []
+
+    import asyncio
+    zoning_feature, overlays, building_features = await asyncio.gather(
+        _fetch_zoning(), _fetch_overlays(), _fetch_buildings()
+    )
+
     base_zone = None
     if zoning_feature:
         zprops = zoning_feature.get("properties", {})
         base_zone = zprops.get("Zoning") or zprops.get("ZONE_CMPLT") or zprops.get("ZONE_CLASS")
     yield event("zoning", "complete")
-
-    # 3 - Fetch overlays
-    yield event("overlays", "in_progress", "Checking overlay zones...")
-    overlays = await gis.fetch_overlays(lat, lng)
     yield event("overlays", "complete")
-
-    # 4 - Fetch buildings
-    yield event("buildings", "in_progress", "Fetching existing building footprints...")
-    try:
-        building_features = await gis.fetch_buildings(lat, lng)
-    except Exception as e:
-        logger.warning(f"Buildings fetch failed: {e}")
-        building_features = []
     yield event("buildings", "complete")
 
     # 5 - Store in DB
